@@ -1,0 +1,11 @@
+node_modules/
+.env
+var/
+tmp/
+.wwebjs_auth/
+.wwebjs_cache/
+*.sqlite*
+media/branding/*
+media/members/*
+imports/old-emails/*
+

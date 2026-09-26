@@ -1,0 +1,197 @@
+{
+  "source": "fixture",
+  "season": 2026,
+  "week": 1,
+  "leagueId": "demo",
+  "final": true,
+  "fetchedAt": "2026-09-01T00:00:00.000Z",
+  "matchups": [
+    {
+      "id": 1,
+      "home": {
+        "teamId": 1,
+        "name": "Demo Team 01",
+        "wins": 0,
+        "losses": 1,
+        "score": 100
+      },
+      "away": {
+        "teamId": 2,
+        "name": "Demo Team 02",
+        "wins": 1,
+        "losses": 0,
+        "score": 110
+      },
+      "winner": "AWAY"
+    },
+    {
+      "id": 2,
+      "home": {
+        "teamId": 3,
+        "name": "Demo Team 03",
+        "wins": 0,
+        "losses": 1,
+        "score": 107.25
+      },
+      "away": {
+        "teamId": 4,
+        "name": "Demo Team 04",
+        "wins": 1,
+        "losses": 0,
+        "score": 115.5
+      },
+      "winner": "AWAY"
+    },
+    {
+      "id": 3,
+      "home": {
+        "teamId": 5,
+        "name": "Demo Team 05",
+        "wins": 0,
+        "losses": 1,
+        "score": 114.5
+      },
+      "away": {
+        "teamId": 6,
+        "name": "Demo Team 06",
+        "wins": 1,
+        "losses": 0,
+        "score": 121
+      },
+      "winner": "AWAY"
+    },
+    {
+      "id": 4,
+      "home": {
+        "teamId": 7,
+        "name": "Demo Team 07",
+        "wins": 0,
+        "losses": 1,
+        "score": 121.75
+      },
+      "away": {
+        "teamId": 8,
+        "name": "Demo Team 08",
+        "wins": 1,
+        "losses": 0,
+        "score": 126.5
+      },
+      "winner": "AWAY"
+    },
+    {
+      "id": 5,
+      "home": {
+        "teamId": 9,
+        "name": "Demo Team 09",
+        "wins": 0,
+        "losses": 1,
+        "score": 129
+      },
+      "away": {
+        "teamId": 10,
+        "name": "Demo Team 10",
+        "wins": 1,
+        "losses": 0,
+        "score": 132
+      },
+      "winner": "AWAY"
+    },
+    {
+      "id": 6,
+      "home": {
+        "teamId": 11,
+        "name": "Demo Team 11",
+        "wins": 0,
+        "losses": 1,
+        "score": 136.25
+      },
+      "away": {
+        "teamId": 12,
+        "name": "Demo Team 12",
+        "wins": 1,
+        "losses": 0,
+        "score": 137.5
+      },
+      "winner": "AWAY"
+    }
+  ],
+  "standings": [
+    {
+      "teamId": 1,
+      "name": "Demo Team 01",
+      "wins": 0,
+      "losses": 1
+    },
+    {
+      "teamId": 2,
+      "name": "Demo Team 02",
+      "wins": 1,
+      "losses": 0
+    },
+    {
+      "teamId": 3,
+      "name": "Demo Team 03",
+      "wins": 0,
+      "losses": 1
+    },
+    {
+      "teamId": 4,
+      "name": "Demo Team 04",
+      "wins": 1,
+      "losses": 0
+    },
+    {
+      "teamId": 5,
+      "name": "Demo Team 05",
+      "wins": 0,
+      "losses": 1
+    },
+    {
+      "teamId": 6,
+      "name": "Demo Team 06",
+      "wins": 1,
+      "losses": 0
+    },
+    {
+      "teamId": 7,
+      "name": "Demo Team 07",
+      "wins": 0,
+      "losses": 1
+    },
+    {
+      "teamId": 8,
+      "name": "Demo Team 08",
+      "wins": 1,
+      "losses": 0
+    },
+    {
+      "teamId": 9,
+      "name": "Demo Team 09",
+      "wins": 0,
+      "losses": 1
+    },
+    {
+      "teamId": 10,
+      "name": "Demo Team 10",
+      "wins": 1,
+      "losses": 0
+    },
+    {
+      "teamId": 11,
+      "name": "Demo Team 11",
+      "wins": 0,
+      "losses": 1
+    },
+    {
+      "teamId": 12,
+      "name": "Demo Team 12",
+      "wins": 1,
+      "losses": 0
+    }
+  ],
+  "transactions": [],
+  "transactionsStatus": "unavailable in synthetic fixture",
+  "rosters": []
+}
+
+

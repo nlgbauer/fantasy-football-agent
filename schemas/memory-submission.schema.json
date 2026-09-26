@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MemorySubmission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "submitter",
+    "target",
+    "category",
+    "proposedText",
+    "source"
+  ],
+  "properties": {
+    "submitter": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "string",
+      "pattern": "^(members|creighton|league|editorial)/[a-z0-9_-]+\\.md$"
+    },
+    "category": {
+      "enum": [
+        "fact",
+        "anecdote",
+        "correction",
+        "boundary",
+        "rule",
+        "joke"
+      ]
+    },
+    "proposedText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12000,
+      "description": "Full replacement Markdown, not an append instruction"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "channel",
+        "messageId"
+      ],
+      "properties": {
+        "channel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+
+
