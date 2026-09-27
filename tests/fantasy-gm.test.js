@@ -20,6 +20,9 @@ test('Fantasy GM ranks available players, compares roster needs and proposes bal
   assert.ok(wrNeed.deficit>0);
   assert.equal(wrNeed.rank,2);
   assert.equal(wrNeed.leagueSize,2);
+  assert.equal(wrNeed.league25th,135);
+  assert.equal(wrNeed.leagueMedian,220);
+  assert.equal(wrNeed.league75th,305);
   const trade=report.trades.find(item=>item.give.name==='QB Surplus'&&item.receive.name==='WR Surplus');
   assert.ok(trade);
   assert.ok(trade.myRosGain>0);
@@ -29,7 +32,7 @@ test('Fantasy GM ranks available players, compares roster needs and proposes bal
   assert.match(trade.acceptanceOutlook,/High|Moderate|Low/);
   assert.match(trade.partnerReason,/gains/);
   assert.equal(trade.talkingPoints.length,3);
-  assert.match(trade.suggestedMessage,/2nd of 2/);
+  assert.match(trade.suggestedMessage,/2nd in the league/);
   assert.match(report.boundary,/No player was added/);
 });
 
@@ -40,9 +43,12 @@ test('Fantasy GM email escapes names and labels every result advisory',()=>{
   assert.match(rendered.html,/&lt;unsafe&gt;/);
   assert.match(rendered.html,/Advisory report only/);
   assert.match(rendered.html,/Why they might accept/);
-  assert.match(rendered.html,/League rank/);
+  assert.match(rendered.html,/League distribution/);
+  assert.match(rendered.html,/25th/);
+  assert.match(rendered.html,/75th/);
   assert.match(rendered.html,/Suggested trade message/);
-  assert.match(rendered.text,/2nd of 2/);
+  assert.match(rendered.text,/2nd in the league/);
+  assert.doesNotMatch(rendered.text,/of 2/);
   assert.match(rendered.text,/No player was added/);
 });
 
