@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildLineupPlan, executeLineupPlan, resolveManagedTeam } from '../src/espn-lineup.js';
+import { analyzeHistoricalLineup, buildLineupPlan, executeLineupPlan, resolveManagedTeam } from '../src/espn-lineup.js';
 
 const stat = points => ({seasonId:2026,scoringPeriodId:3,statSourceId:1,statSplitTypeId:1,appliedTotal:points});
 const entry = (playerId,name,lineupSlotId,points,eligibleSlots=[0,20],locked=false) => ({
@@ -11,6 +11,26 @@ const raw = entries => ({
   teams:[{id:11,name:'the owner Team',owners:['{owner-one}'],roster:{entries}}]
 });
 const env={ESPN_LEAGUE_ID:'424242',ESPN_SEASON:'2026',ESPN_S2:'secret',SWID:'{OWNER-ONE}',ESPN_LINEUP_WRITE_ENABLED:'true',ESPN_LINEUP_MIN_GAIN:'1'};
+
+test('historical analysis separates starters and bench and finds the best legal missed start',()=>{
+  const actualStat=points=>({seasonId:2026,scoringPeriodId:2,statSourceId:0,statSplitTypeId:1,appliedTotal:points});
+  const historicalEntry=(playerId,name,lineupSlotId,points,positionId,eligibleSlots)=>({playerId,lineupSlotId,playerPoolEntry:{player:{fullName:name,defaultPositionId:positionId,eligibleSlots,stats:[actualStat(points)]}}});
+  const historical={...raw([]),settings:{rosterSettings:{lineupSlotCounts:{0:1,2:1,20:2}}},teams:[{id:11,name:'the owner Team',owners:['{owner-one}'],roster:{entries:[
+    historicalEntry(1,'Starting QB',0,20,1,[0,20]),historicalEntry(2,'Starting RB',2,5,2,[2,20]),
+    historicalEntry(3,'Bench RB',20,12,2,[2,20]),historicalEntry(4,'Bench QB',20,3,1,[0,20])
+  ]}}]};
+  const analysis=analyzeHistoricalLineup(historical,env,2);
+  assert.deepEqual(analysis.starters.map(item=>item.name),['Starting QB','Starting RB']);
+  assert.deepEqual(analysis.bench.map(item=>item.name),['Bench RB','Bench QB']);
+  assert.equal(analysis.starterPoints,25);
+  assert.equal(analysis.benchPoints,15);
+  assert.equal(analysis.starterAverage,12.5);
+  assert.equal(analysis.benchAverage,7.5);
+  assert.equal(analysis.optimizedPoints,32);
+  assert.equal(analysis.optimizedStarterAverage,16);
+  assert.equal(analysis.missedPoints,7);
+  assert.deepEqual(analysis.swaps.map(item=>[item.start.name,item.bench.name,item.gain]),[['Bench RB','Starting RB',7]]);
+});
 
 test('optimizer swaps only eligible unlocked roster players and reports projected gain',()=>{
   const plan=buildLineupPlan(raw([

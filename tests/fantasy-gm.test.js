@@ -38,6 +38,7 @@ test('Fantasy GM ranks available players, compares roster needs and proposes bal
 
 test('Fantasy GM email escapes names and labels every result advisory',()=>{
   const report=analyzeFantasyGm(structuredClone(raw),env,3);report.teamName='<unsafe>';
+  report.benchAnalysis={week:2,starters:[{name:'Starter <One>',position:'QB',points:20}],bench:[{name:'Bench & Better',position:'QB',points:25}],starterPoints:20,benchPoints:25,starterAverage:20,benchAverage:25,optimizedPoints:25,optimizedStarterAverage:25,missedPoints:5,swaps:[{start:{name:'Bench & Better',points:25},bench:{name:'Starter <One>',points:20},gain:5}]};
   const rendered=renderFantasyGmReport(report);
   assert.ok(!rendered.html.includes('<unsafe>'));
   assert.match(rendered.html,/&lt;unsafe&gt;/);
@@ -47,6 +48,11 @@ test('Fantasy GM email escapes names and labels every result advisory',()=>{
   assert.match(rendered.html,/25th/);
   assert.match(rendered.html,/75th/);
   assert.match(rendered.html,/Suggested trade message/);
+  assert.match(rendered.html,/Week 2 starters vs bench/);
+  assert.match(rendered.html,/Best legal lineup: 25.00 \(\+5.00\)/);
+  assert.match(rendered.html,/Bench &amp; Better/);
+  assert.match(rendered.text,/WEEK 2 STARTERS/);
+  assert.match(rendered.text,/average per starter 20.00 -> 25.00/);
   assert.match(rendered.text,/2nd in the league/);
   assert.doesNotMatch(rendered.text,/of 2/);
   assert.match(rendered.text,/No player was added/);

@@ -4,12 +4,19 @@ import { fetchLeague } from './adapters/espn.js';
 const BENCH = 20;
 const IR = 21;
 const SLOT_NAMES = {0:'QB',2:'RB',4:'WR',6:'TE',16:'D/ST',17:'K',20:'Bench',21:'IR',23:'FLEX'};
+const POSITION_NAMES = {1:'QB',2:'RB',3:'WR',4:'TE',5:'K',16:'D/ST'};
 const cleanId = value => String(value || '').replace(/[{}]/g, '').toLowerCase();
 const round = value => Number(Number(value || 0).toFixed(2));
 
 function projection(entry, season, scoringPeriodId) {
   return round(entry.playerPoolEntry?.player?.stats?.find(stat =>
     stat.seasonId === season && stat.scoringPeriodId === scoringPeriodId && stat.statSourceId === 1 && stat.statSplitTypeId === 1
+  )?.appliedTotal || 0);
+}
+
+function actual(entry, season, scoringPeriodId) {
+  return round(entry.playerPoolEntry?.player?.stats?.find(stat =>
+    stat.seasonId === season && stat.scoringPeriodId === scoringPeriodId && stat.statSourceId === 0 && stat.statSplitTypeId === 1
   )?.appliedTotal || 0);
 }
 
@@ -59,6 +66,36 @@ function bestAssignment(players, slots) {
     return best;
   };
   return visit(0,0);
+}
+
+export function analyzeHistoricalLineup(raw, env, scoringPeriodId) {
+  const season=raw.seasonId,team=resolveManagedTeam(raw,env),slots=activeSlots(raw);
+  if(!slots.length)throw new Error('ESPN roster settings contain no active lineup slots');
+  const players=(team.roster?.entries||[]).filter(entry=>Number(entry.lineupSlotId)!==IR).map(entry=>({
+    playerId:Number(entry.playerId),
+    name:entry.playerPoolEntry?.player?.fullName||`Player ${entry.playerId}`,
+    position:POSITION_NAMES[Number(entry.playerPoolEntry?.player?.defaultPositionId)]||'Player',
+    fromLineupSlotId:Number(entry.lineupSlotId),
+    eligibleSlots:(entry.playerPoolEntry?.player?.eligibleSlots||[]).map(Number),
+    actual:actual(entry,season,scoringPeriodId)
+  }));
+  const candidates=players.filter(player=>player.eligibleSlots.some(slot=>slots.includes(slot))).map(player=>({...player,projected:player.actual}));
+  const optimized=bestAssignment(candidates,slots);
+  if(!optimized)throw new Error('No complete legal historical lineup can be built from the ESPN roster');
+  const selected=new Map(optimized.picks.map(item=>[candidates[item.playerIndex].playerId,item.slot]));
+  const starters=players.filter(player=>![BENCH,IR].includes(player.fromLineupSlotId)).sort((a,b)=>b.actual-a.actual||a.name.localeCompare(b.name));
+  const bench=players.filter(player=>player.fromLineupSlotId===BENCH).sort((a,b)=>b.actual-a.actual||a.name.localeCompare(b.name));
+  const currentPoints=round(starters.reduce((sum,player)=>sum+player.actual,0)),optimizedPoints=round(optimized.score);
+  const promoted=candidates.filter(player=>player.fromLineupSlotId===BENCH&&selected.has(player.playerId));
+  const demoted=candidates.filter(player=>player.fromLineupSlotId!==BENCH&&!selected.has(player.playerId));
+  const usedDemoted=new Set(),swaps=promoted.map(player=>{
+    const targetSlot=selected.get(player.playerId);
+    const replaced=demoted.filter(item=>!usedDemoted.has(item.playerId)&&item.fromLineupSlotId===targetSlot).sort((a,b)=>a.actual-b.actual)[0]||demoted.filter(item=>!usedDemoted.has(item.playerId)&&player.eligibleSlots.includes(item.fromLineupSlotId)).sort((a,b)=>a.actual-b.actual)[0]||null;
+    if(replaced)usedDemoted.add(replaced.playerId);
+    return {start:{playerId:player.playerId,name:player.name,position:player.position,points:player.actual},bench:replaced?{playerId:replaced.playerId,name:replaced.name,position:replaced.position,points:replaced.actual}:null,gain:round(player.actual-(replaced?.actual||0))};
+  }).filter(item=>item.gain>0);
+  const starterCount=starters.length;
+  return {week:scoringPeriodId,teamId:team.id,teamName:team.name.trim(),starters:starters.map(({playerId,name,position,actual})=>({playerId,name,position,points:actual})),bench:bench.map(({playerId,name,position,actual})=>({playerId,name,position,points:actual})),starterPoints:currentPoints,benchPoints:round(bench.reduce((sum,player)=>sum+player.actual,0)),starterAverage:round(currentPoints/Math.max(starterCount,1)),benchAverage:round(bench.reduce((sum,player)=>sum+player.actual,0)/Math.max(bench.length,1)),optimizedPoints,optimizedStarterAverage:round(optimizedPoints/Math.max(starterCount,1)),missedPoints:round(optimizedPoints-currentPoints),swaps};
 }
 
 export function buildLineupPlan(raw, env, scoringPeriodId = raw.status?.currentMatchupPeriod) {
@@ -144,6 +181,3 @@ export async function createCurrentLineupPlan(env) {
   const raw = await fetchLeague(env,['mTeam','mRoster','mSettings','mStatus'],{scoringPeriodId});
   return buildLineupPlan(raw,env,scoringPeriodId);
 }
-
-
-
